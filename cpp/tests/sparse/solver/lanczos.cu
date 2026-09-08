@@ -117,7 +117,7 @@ template <typename ValueType>
 ValueType eigenvalue_tolerance(ValueType frobenius_norm)
 {
   auto eps = std::numeric_limits<ValueType>::epsilon();
-  return ValueType(500) * std::max(frobenius_norm, ValueType(1)) * eps;
+  return ValueType(10000) * std::max(frobenius_norm, ValueType(1)) * eps;
 }
 
 /**
@@ -192,12 +192,12 @@ void expect_valid_eigenpairs(
 
   // Eigenvalue-accuracy tolerance -- applied to the ascending-order check and
   // the Rayleigh-quotient check. Both carry the magnitude of A, so the noise
-  // floor is proportional to ||A||_F * eps. Measured across all fixtures on
-  // sm_75/CUDA 13 these stay within ~15 * ||A||_F * eps with no dependence on
-  // n, so n is deliberately not a factor (including it would inflate the RMAT
-  // tolerance ~40x and let a 1% eigenvalue error pass). This is held tight for
-  // every mode: Lanczos returns accurate eigenVALUES even when the
-  // eigenVECTOR is poorly conditioned.
+  // floor is proportional to ||A||_F * eps. Cross-platform SM results have
+  // varied by up to ~4300 * ||A||_F * eps, so allow enough margin for GPU and
+  // CUDA-version differences. The tolerance deliberately has no n factor,
+  // which would inflate the RMAT tolerance ~40x and let a 1% eigenvalue error
+  // pass. This remains tight enough to catch meaningful eigenvalue errors even
+  // when the eigenVECTOR is poorly conditioned.
   const ValueType eigenvalue_tol = eigenvalue_tolerance(frobenius_norm);
 
   // Eigenvector-accuracy tolerances -- applied to the residual, unit-norm and
