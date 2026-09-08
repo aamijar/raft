@@ -46,6 +46,7 @@
 #include <cmath>
 #include <cstdint>
 #include <limits>
+#include <type_traits>
 
 namespace raft::sparse::solver {
 
@@ -116,8 +117,9 @@ ValueType compute_frobenius_norm(raft::resources const& handle, ValueType const*
 template <typename ValueType>
 ValueType eigenvalue_tolerance(ValueType frobenius_norm)
 {
-  auto eps = std::numeric_limits<ValueType>::epsilon();
-  return ValueType(10000) * std::max(frobenius_norm, ValueType(1)) * eps;
+  auto eps        = std::numeric_limits<ValueType>::epsilon();
+  auto multiplier = std::is_same_v<ValueType, double> ? ValueType(10000) : ValueType(500);
+  return multiplier * std::max(frobenius_norm, ValueType(1)) * eps;
 }
 
 /**
